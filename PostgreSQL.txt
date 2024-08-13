@@ -1,0 +1,200 @@
+PostgreSQL
+
+1) datatype : 
+
+- more data types than MySQL
+
+2) Index : (indexes / indices)
+
+- type: b tree, hash, GIS, fulltext search
+
+- b tree: order by ASC/DESC Null FIRST/LAST
+
+- partial index
+
+- index on Expressions
+
+-  query covering index
+
+must verify that each retrieved row be “visible” to the query's MVCC
+snapshot
+
+- create index, include several fields
+
+- combining multiple indices ( AND, OR) 
+
+use bitmap => likely loose the order
+this strategy is enabled depend on query planer
+Mysql just offers combining several indices for OR Query
+
+- ANALYZE
+
+- EXPLAIN
+
+- EXPLAIN ANALYZE
+
+actually runs the query, any side-effects will happen
+as usual => should run in transaction then ROLLBACK 
+
+- EXPLAIN (ANALYZE, BUFFERS, COSTS )
+
+- JOIN:
+
+nested loop join (index)
+merge join
+hash join
+
+
+3) Client:
+
+- 1 process per connection
+
+MySQL : 1 thread per connection
+
+4) Concurrency control
+
+4) Internal
+
+- Heap-Only Tuples
+
+- Write Ahead Log
+
+- Just in Time Compilation
+
+- Planner/Optimizer
+
+paths: simply cut-down representations of plans containing only as much information as the planner needs to make its decisions
+plan: After the cheapest path is determined, a full-fledged plan tree is built to pass to the executor
+
+5) Uber prefer MySQL Over PostgreSQL
+
+PostgreSQL:
+
+- Tuple: 
+
+immutable row data 
+
+ctid: represents the on-disk location (i.e., physical disk offset)
+
+each node in the B-tree holds the ctid value
+
+the primary index and secondary indexes all point directly to the on-disk tuple offsets. When a tuple location changes, all indexes must be updated.
+
+=> write amplification
+
+- replication: Write Ahead Log & 2-phase commit
+
+=> replication amplification
+
+MySQL:
+
+- row: mutable; update row in MVCC is in-place, copy old row to undo log
+
+- index: primary index & secondary index
+
+MySQL uses an extra layer of indirection: secondary index records point to primary index records, and the primary index itself holds the on-disk row locations. 
+If a row offset changes, only the primary index needs to be updated.
+
+also makes vacuuming and compaction more efficient
+
+- the MySQL replication binary log is significantly more compact than the PostgreSQL WAL stream,
+
+
+----------------------
+
+PostgreSQL internal
+
+- process: 
+
+postmaster
+
+- memory:
+
+shared buffer
+
+- Block and Page
+
+In PostgreSQL, I / O is done on a block basis. The size of the block is 8 KB by default. In order to
+In current PostgreSQL, a block contains one page,
+therefore a block and a page can be considered the same thing. 131,072 blocks (pages) can be stored
+within one file. When the data file exceeds this size (8 KB × 131,072 = 1 GB), a new file is created.
+This value is determined by the RELSEG_SIZE macro of pg_config.h file.
+In each page, a pointer to each tuple in the page and to the page header is stored. Item pointer
+indicates the location of the tuples in the page. Tuple is stored towards the top of the page from the
+end of the page. On the other hand, item pointer will be added towards the end of the page immediately
+after the page header.
+
+- tuple:
+
+header: t_xmin, t_xmax, t_cid, t_xvac
+
+- Transaction ID wraparound:
+
+In large systems, utilizing a large number of transactions may runs out 32 bits
+=> replaces the old transaction ID to a special value (FrozenXID = 2) regularly
+
+- Transaction:
+
+Sequence values are independent of the transaction. Sequence value obtained during a transaction
+cannot be rolled back.
+
+- Parallel:
+
+can be executed only for Seq Scan, Join and Aggregate
+
+- Streaming replication:
+
+WAL
+cascade
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
