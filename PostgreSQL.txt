@@ -148,45 +148,101 @@ WAL
 cascade
 
 
+----------------------
+
+PostgreSQL 14 internal
+
+1) Introduction
+
+1.1 Data organization
+
+- database cluster
+
+- system catalog: metadata of all cluster objects is stored in tables that belong to system catalog
+
+- oid: 4 byte integer
+
+- schemas: are namespaces that store all objects of a database
+
+public
+pg_catalog
+information_schema
+pg_toast
+pg_temp
+
+- tablespace: define physical data layout
+
+logical structure & physical data layout do not depend on each other
+
+- relations:
+
+table, index, sequence, materialized view, regular view
+
+- file & fork:
+
+- pages:
+
+(or blocks)
+represent the minimum amount of data that can be read or written
+
+- TOAST
+
+The Oversized Attributes Storage Technique
+
+1.2 Processes and Memory
+
+- postmaster
+
+- share memory: buffer cache
+
+1.3 Client & Server 
+
+- 1 process/connection
+
+- dont have built-in connection pooling 
+=> use connection pooling in application, or external tools (pgBouncer, etc)
 
 
+2) Isolation
 
+- consistency
 
+- integrity
 
+- anomaly / phenomena
 
+lost update (prevented in all isolation levels)
+dirty read (read uncommitted)
+non repeatable read (read committed)
+phantom read (repeatable read)
+no anomalies (serializable)
 
+- snapshot isolation protocol
 
+Postgres:
+read uncommitted: same as read committed
+read committed: could occur lost update
+repeatable read: no phantom read
 
+3) Pages & Tuples
 
+3.1 Page structure
 
+- page header
 
+- an array of item pointers
 
+- free space
 
+- items (row versions)
 
+- special space
 
+4) Snapshot
 
+5) Page pruning & HOT update
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+10) Write-ahead log
 
 
 
